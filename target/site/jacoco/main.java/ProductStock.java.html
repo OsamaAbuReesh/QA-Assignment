@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ProductStock.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">productstock</a> &gt; <a href="index.source.html" class="el_package">main.java</a> &gt; <span class="el_source">ProductStock.java</span></div><h1>ProductStock.java</h1><pre class="source lang-java linenums">package main.java;
+
+public class ProductStock {
+    private final String productId;
+    private String location; // e.g., &quot;WH-1-A3&quot;
+    private int onHand; // physical units stored
+    private int reserved; // units reserved for orders
+    private int reorderThreshold; // when available &lt; threshold -&gt; reorder needed
+    private int maxCapacity; // max units this location can store
+
+    /**
+     * Creates a ProductStock instance with basic inventory info.
+     *
+     * @param productId unique ID of the product (must not be null/blank)
+     * @param location storage location code (must not be null/blank)
+     * @param initialOnHand initial on-hand quantity (&gt;= 0)
+     * @param reorderThreshold threshold for triggering reorder (&gt;= 0)
+     * @param maxCapacity maximum capacity of this location (&gt; 0)
+     */
+<span class="fc" id="L20">    public ProductStock(String productId, String location, int initialOnHand, int reorderThreshold, int maxCapacity) {</span>
+<span class="fc bfc" id="L21" title="All 4 branches covered.">        if (productId == null || productId.trim().isEmpty()) {</span>
+<span class="fc" id="L22">            throw new IllegalArgumentException(&quot;productId must not be null or blank&quot;);</span>
+        }
+<span class="fc bfc" id="L24" title="All 4 branches covered.">        if (location == null || location.trim().isEmpty()) {</span>
+<span class="fc" id="L25">            throw new IllegalArgumentException(&quot;location must not be null or blank&quot;);</span>
+        }
+<span class="fc bfc" id="L27" title="All 2 branches covered.">        if (initialOnHand &lt; 0) {</span>
+<span class="fc" id="L28">            throw new IllegalArgumentException(&quot;initialOnHand must be &gt;= 0&quot;);</span>
+        }
+<span class="fc bfc" id="L30" title="All 2 branches covered.">        if (reorderThreshold &lt; 0) {</span>
+<span class="fc" id="L31">            throw new IllegalArgumentException(&quot;reorderThreshold must be &gt;= 0&quot;);</span>
+        }
+<span class="fc bfc" id="L33" title="All 2 branches covered.">        if (maxCapacity &lt;= 0) {</span>
+<span class="fc" id="L34">            throw new IllegalArgumentException(&quot;maxCapacity must be &gt; 0&quot;);</span>
+        }
+<span class="fc bfc" id="L36" title="All 2 branches covered.">        if (initialOnHand &gt; maxCapacity) {</span>
+<span class="fc" id="L37">            throw new IllegalArgumentException(&quot;initialOnHand exceeds maxCapacity&quot;);</span>
+        }
+<span class="fc" id="L39">        this.productId = productId;</span>
+<span class="fc" id="L40">        this.location = location;</span>
+<span class="fc" id="L41">        this.onHand = initialOnHand;</span>
+<span class="fc" id="L42">        this.reserved = 0;</span>
+<span class="fc" id="L43">        this.reorderThreshold = reorderThreshold;</span>
+<span class="fc" id="L44">        this.maxCapacity = maxCapacity;</span>
+<span class="fc" id="L45">    }</span>
+
+    // ---------- Getters ----------
+    public String getProductId() {
+<span class="fc" id="L49">        return productId;</span>
+    }
+
+    public String getLocation() {
+<span class="fc" id="L53">        return location;</span>
+    }
+
+    public int getOnHand() {
+<span class="fc" id="L57">        return onHand;</span>
+    }
+
+    public int getReserved() {
+<span class="fc" id="L61">        return reserved;</span>
+    }
+
+    /**
+     * Available stock = onHand - reserved.
+     */
+    public int getAvailable() {
+<span class="fc" id="L68">        return onHand - reserved;</span>
+    }
+
+    public int getReorderThreshold() {
+<span class="fc" id="L72">        return reorderThreshold;</span>
+    }
+
+    public int getMaxCapacity() {
+<span class="fc" id="L76">        return maxCapacity;</span>
+    }
+
+    // ---------- Mutating operations with business rules ----------
+    /**
+     * Change physical location of the stock.
+     */
+    public void changeLocation(String newLocation) {
+<span class="fc bfc" id="L84" title="All 4 branches covered.">        if (newLocation == null || newLocation.trim().isEmpty()) {</span>
+<span class="fc" id="L85">            throw new IllegalArgumentException(&quot;newLocation must not be null or blank&quot;);</span>
+        }
+<span class="fc" id="L87">        this.location = newLocation;</span>
+<span class="fc" id="L88">    }</span>
+
+    /**
+     * Adds stock to on-hand quantity. Fails if amount is not positive
+     * or if the operation would exceed maxCapacity.
+     */
+    public void addStock(int amount) {
+<span class="fc bfc" id="L95" title="All 2 branches covered.">        if (amount &lt;= 0) {</span>
+<span class="fc" id="L96">            throw new IllegalArgumentException(&quot;Amount to add must be positive&quot;);</span>
+        }
+<span class="fc bfc" id="L98" title="All 2 branches covered.">        if (onHand + amount &gt; maxCapacity) {</span>
+<span class="fc" id="L99">            throw new IllegalStateException(&quot;Cannot add stock beyond maxCapacity&quot;);</span>
+        }
+<span class="fc" id="L101">        onHand += amount;</span>
+<span class="fc" id="L102">    }</span>
+
+    /**
+     * Removes stock from on-hand as damaged/expired.
+     * Cannot remove more than onHand.
+     */
+    public void removeDamaged(int amount) {
+<span class="fc bfc" id="L109" title="All 2 branches covered.">        if (amount &lt;= 0) {</span>
+<span class="fc" id="L110">            throw new IllegalArgumentException(&quot;Amount to remove must be positive&quot;);</span>
+        }
+<span class="fc bfc" id="L112" title="All 2 branches covered.">        if (amount &gt; onHand) {</span>
+<span class="fc" id="L113">            throw new IllegalStateException(&quot;Cannot remove more than on-hand quantity&quot;);</span>
+        }
+<span class="fc" id="L115">        onHand -= amount; // reserved is unchanged here</span>
+<span class="pc bpc" id="L116" title="1 of 2 branches missed.">        if (reserved &gt; onHand) { // Safety: never allow reserved &gt; onHand</span>
+<span class="fc" id="L117">            reserved = onHand;</span>
+        }
+<span class="fc" id="L119">    }</span>
+
+    /**
+     * Reserves stock for a customer order.
+     * Cannot reserve more than available.
+     */
+    public void reserve(int amount) {
+<span class="fc bfc" id="L126" title="All 2 branches covered.">        if (amount &lt;= 0) {</span>
+<span class="fc" id="L127">            throw new IllegalArgumentException(&quot;Amount to reserve must be positive&quot;);</span>
+        }
+<span class="fc bfc" id="L129" title="All 2 branches covered.">        if (amount &gt; getAvailable()) {</span>
+<span class="fc" id="L130">            throw new IllegalStateException(&quot;Insufficient available stock to reserve&quot;);</span>
+        }
+<span class="fc" id="L132">        reserved += amount;</span>
+<span class="fc" id="L133">    }</span>
+
+    /**
+     * Releases (un-reserves) previously reserved stock.
+     * Cannot release more than currently reserved.
+     */
+    public void releaseReservation(int amount) {
+<span class="fc bfc" id="L140" title="All 2 branches covered.">        if (amount &lt;= 0) {</span>
+<span class="fc" id="L141">            throw new IllegalArgumentException(&quot;Amount to release must be positive&quot;);</span>
+        }
+<span class="fc bfc" id="L143" title="All 2 branches covered.">        if (amount &gt; reserved) {</span>
+<span class="fc" id="L144">            throw new IllegalStateException(&quot;Cannot release more than reserved&quot;);</span>
+        }
+<span class="fc" id="L146">        reserved -= amount;</span>
+<span class="fc" id="L147">    }</span>
+
+    /**
+     * Confirms shipment: removes stock from on-hand and reserved at the same time.
+     * This assumes the amount was previously reserved.
+     */
+    public void shipReserved(int amount) {
+<span class="fc bfc" id="L154" title="All 2 branches covered.">        if (amount &lt;= 0) {</span>
+<span class="fc" id="L155">            throw new IllegalArgumentException(&quot;Amount to ship must be positive&quot;);</span>
+        }
+<span class="fc bfc" id="L157" title="All 2 branches covered.">        if (amount &gt; reserved) {</span>
+<span class="fc" id="L158">            throw new IllegalStateException(&quot;Cannot ship more than reserved&quot;);</span>
+        }
+<span class="pc bpc" id="L160" title="1 of 2 branches missed.">        if (amount &gt; onHand) {</span>
+            // Should not happen if invariant reserved &lt;= onHand holds,
+            // but we guard anyway.
+<span class="nc" id="L163">            throw new IllegalStateException(&quot;On-hand quantity is not enough to ship&quot;);</span>
+        }
+<span class="fc" id="L165">        reserved -= amount;</span>
+<span class="fc" id="L166">        onHand -= amount;</span>
+<span class="fc" id="L167">    }</span>
+
+    /**
+     * Returns true if available stock is below reorder threshold.
+     */
+    public boolean isReorderNeeded() {
+<span class="fc bfc" id="L173" title="All 2 branches covered.">        return getAvailable() &lt; reorderThreshold;</span>
+    }
+
+    /**
+     * Updates the reorder threshold, must be &gt;= 0 and &lt;= maxCapacity.
+     */
+    public void updateReorderThreshold(int newThreshold) {
+<span class="fc bfc" id="L180" title="All 2 branches covered.">        if (newThreshold &lt; 0) {</span>
+<span class="fc" id="L181">            throw new IllegalArgumentException(&quot;reorderThreshold must be &gt;= 0&quot;);</span>
+        }
+<span class="fc bfc" id="L183" title="All 2 branches covered.">        if (newThreshold &gt; maxCapacity) {</span>
+<span class="fc" id="L184">            throw new IllegalArgumentException(&quot;reorderThreshold cannot exceed maxCapacity&quot;);</span>
+        }
+<span class="fc" id="L186">        this.reorderThreshold = newThreshold;</span>
+<span class="fc" id="L187">    }</span>
+
+    /**
+     * Updates max capacity. Cannot be less than current onHand.
+     */
+    public void updateMaxCapacity(int newMaxCapacity) {
+<span class="fc bfc" id="L193" title="All 2 branches covered.">        if (newMaxCapacity &lt;= 0) {</span>
+<span class="fc" id="L194">            throw new IllegalArgumentException(&quot;maxCapacity must be &gt; 0&quot;);</span>
+        }
+<span class="fc bfc" id="L196" title="All 2 branches covered.">        if (newMaxCapacity &lt; onHand) {</span>
+<span class="fc" id="L197">            throw new IllegalStateException(&quot;New maxCapacity is less than current onHand&quot;);</span>
+        }
+<span class="fc" id="L199">        this.maxCapacity = newMaxCapacity;</span>
+<span class="fc bfc" id="L200" title="All 2 branches covered.">        if (reorderThreshold &gt; maxCapacity) {</span>
+<span class="fc" id="L201">            reorderThreshold = maxCapacity;</span>
+        }
+<span class="fc" id="L203">    }</span>
+
+    @Override
+    public String toString() {
+<span class="fc" id="L207">        return &quot;ProductStock{&quot; + &quot;productId='&quot; + productId + '\'' + &quot;, location='&quot; + location + '\'' + &quot;, onHand=&quot; + onHand + &quot;, reserved=&quot; + reserved + &quot;, available=&quot; + getAvailable() + &quot;, reorderThreshold=&quot; + reorderThreshold + &quot;, maxCapacity=&quot; + maxCapacity + '}';</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>
