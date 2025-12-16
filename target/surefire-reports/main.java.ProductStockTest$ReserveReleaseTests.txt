@@ -1,4 +1,0 @@
--------------------------------------------------------------------------------
-Test set: main.java.ProductStockTest$ReserveReleaseTests
--------------------------------------------------------------------------------
-Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.019 s - in main.java.ProductStockTest$ReserveReleaseTests
